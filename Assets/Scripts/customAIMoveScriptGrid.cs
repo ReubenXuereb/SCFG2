@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 using Pathfinding;
 
 
-public class AIEnemy : MonoBehaviour
+public class customAIMoveScriptGrid : MonoBehaviour
 {
     //the object that we are using to generate the path
     Seeker seeker;
@@ -18,11 +19,10 @@ public class AIEnemy : MonoBehaviour
     //a reference to PointGraphObject
     GameObject graphParent;
 
-   
+    //the node of the graph that is going to correspond with the green box
+    GameObject targetNode;
 
     public List<Transform> obstacleNodes;
-
-    GameObject Player;
 
 
     // Start is called before the first frame update
@@ -36,10 +36,10 @@ public class AIEnemy : MonoBehaviour
 
 
         //node target by name
-        //targetNode = GameObject.Find("TargetNode");
+        targetNode = GameObject.Find("TargetNode");
 
         //find the parent node of the point graph
-        //graphParent = GameObject.Find("PointGraphObject");
+         //graphParent = GameObject.Find("PointGraphObject");
         graphParent = GameObject.Find("AStarGrid");
         //we scan the graph to generate it in memory
         graphParent.GetComponent<AstarPath>().Scan();
@@ -47,24 +47,41 @@ public class AIEnemy : MonoBehaviour
         //generate the initial path
         pathToFollow = seeker.StartPath(transform.position, target.position);
 
+        //move the green box in a coroutine.  Runs indefinitely
+        StartCoroutine(moveTarget());
+
         //update the graph as soon as you can.  Runs indefinitely
         StartCoroutine(updateGraph());
 
         //move the red robot towards the green enemy
         StartCoroutine(moveTowardsEnemy(this.transform));
-
-        Player = GameObject.Find("snakeHead");
     }
 
     //the code that is going to move my target.
-
-    private void OnTriggerEnter2D(Collider2D collision)
+    IEnumerator moveTarget()
     {
-        if (collision.transform.CompareTag("Player"))
-        {
-            collision.transform.position = GetComponent<snakeController>().startPos;
-        }
+        //create a new list of positions.
+        List<Vector3> positions = new List<Vector3>();
+        //target's current position (the top position)
+        positions.Add(target.position);
+
+        //adding another position (the bottom position)
+        positions.Add(new Vector3(target.position.x, -target.position.y));
+
+        
+
+        //Class Task 1: Add another 5 positions to the circuit
+        //Class Task 2: Build a coroutine that will move the white obstacle up and down, INCLUDING the 4 nodes 
+
+        //starting position, the list of positions and a boolean parameter stating if the path is looped
+        StartCoroutine(moveTarget(target.transform, positions, true));
+
+
+
+        yield return null;
+
     }
+
 
 
     IEnumerator updateGraph()
@@ -72,7 +89,7 @@ public class AIEnemy : MonoBehaviour
         while (true)
         {
 
-            //   targetNode.transform.position = target.position;
+      //   targetNode.transform.position = target.position;
             graphParent.GetComponent<AstarPath>().Scan();
 
 
@@ -81,6 +98,48 @@ public class AIEnemy : MonoBehaviour
         }
 
     }
+
+    IEnumerator moveTarget(Transform t, List<Vector3> points, bool loop)
+    {
+        if (loop)
+        {
+            //needs to run indefinitely
+            while (true)
+            {
+                List<Vector3> forwardpoints = points;
+
+                foreach (Vector3 position in forwardpoints)
+                {
+                    while (Vector3.Distance(t.position, position) > 0.5f)
+                    {
+                        t.position = Vector3.MoveTowards(t.position, position, 1f);
+                        Debug.Log(position);/**/
+                        yield return new WaitForSeconds(0.2f);
+                    }
+                }
+                //reverse the points supplied here
+                forwardpoints.Reverse();
+                yield return null;
+
+            }
+        }
+        else
+        {
+            foreach (Vector3 position in points)
+            {
+                while (Vector3.Distance(t.position, position) > 0.5f)
+                {
+                    t.position = Vector3.MoveTowards(t.position, position, 1f);
+                    /**/
+                    yield return new WaitForSeconds(0.2f);
+                }
+            }
+            yield return null;
+        }
+
+
+    }
+
 
     IEnumerator moveTowardsEnemy(Transform t)
     {
@@ -94,8 +153,7 @@ public class AIEnemy : MonoBehaviour
             for (int counter = 0; counter < posns.Count; counter++)
             {
                 // Debug.Log("Distance: " + Vector3.Distance(t.position, posns[counter]));
-                if (posns[counter] != null)
-                {
+                if (posns[counter] != null) { 
                     while (Vector3.Distance(t.position, posns[counter]) >= 0.5f)
                     {
                         t.position = Vector3.MoveTowards(t.position, posns[counter], 1f);
@@ -106,7 +164,7 @@ public class AIEnemy : MonoBehaviour
                         //if the path is different, update the path that I need to follow
                         posns = pathToFollow.vectorPath;
 
-                        //  Debug.Log("@:" + t.position + " " + target.position + " " + posns[counter]);
+                      //  Debug.Log("@:" + t.position + " " + target.position + " " + posns[counter]);
                         yield return new WaitForSeconds(0.2f);
                     }
 

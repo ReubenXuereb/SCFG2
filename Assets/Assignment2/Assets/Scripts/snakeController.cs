@@ -4,6 +4,7 @@ using UnityEngine;
 public class snakeController : MonoBehaviour
 {
     public List<Vector3> positions;
+    public Vector3 startPos;
 
     bool Left = false;
     bool Right = false;
@@ -20,12 +21,13 @@ public class snakeController : MonoBehaviour
     void Start()
     {
         positions = new List<Vector3>();
-        snakeSize = GameObject.Find("GameManager").GetComponent<GameManager2>().snakeSize;
+        snakeSize = GameObject.Find("GameManager").GetComponent<GameManager>().snakeSize;
+        //startPos = this.transform.position;
         
-        Left = true;
+        Left = false;
         Right = false;
         Up = false;
-        Down = false;
+        Down = true;
     }
 
     void Update()
@@ -93,6 +95,14 @@ public class snakeController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.transform.CompareTag("Obstacle"))
+        {
+            this.transform.position = startPos;
+        }
+    }
+
     void snakeMove()
     {
         if (Up)
@@ -127,7 +137,7 @@ public class snakeController : MonoBehaviour
 
            /* if (snakeSize >= 6)
             {
-                GameObject.Find("EndTarget").GetComponent<ToNextLevel>().TurnOn();
+                GameObject.Find("Portalt").GetComponent<ToNextLevel>().TurnOn();
             }*/
         }
     }

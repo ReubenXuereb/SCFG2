@@ -6,17 +6,17 @@ public class foodScript : MonoBehaviour
 {
 
     /*List<Vector3> wallPositions;
-    [SerializeField] GameObject food;*/
     [SerializeField] GameObject food;
-    [SerializeField] int size;
+    //[SerializeField] GameObject food;
+    //[SerializeField] int size;
     // Start is called before the first frame update
     void Start()
     {
-        addFood();
+        StartCoroutine(addFood());
     }
 
 
-    /*public Vector3 randomGenerator()
+    public Vector3 randomGenerator()
     {
         Vector3 positions;
         int x, y;
@@ -31,7 +31,7 @@ public class foodScript : MonoBehaviour
         return positions;
     }
 
-    public void addFood()
+    IEnumerator addFood()
     {
         while (true)
         {
@@ -40,8 +40,9 @@ public class foodScript : MonoBehaviour
             wallPositions.Add(positions);
             GameObject obstacles = Instantiate(food, positions, Quaternion.identity);
         }
-    }*/
-    void addFood()
+        yield return null;
+    }
+    /*void addFood()
     {
         for(int i = 0; 1 < size; i++)
         {
@@ -54,5 +55,5 @@ public class foodScript : MonoBehaviour
                 }
             }
         }
-    }
+    }*/
 }

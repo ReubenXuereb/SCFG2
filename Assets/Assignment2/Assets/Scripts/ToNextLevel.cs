@@ -1,18 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ToNextLevel : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        if(collision.transform.CompareTag("Player") && SceneManager.GetActiveScene().name == ("Level1"))
+        {
+            if(GameObject.Find("GameManager").GetComponent<GameManager>().snakeSize >= 6)
+            {
+                SceneManager.LoadScene("Level2");
+            }
+        }
+        else if(collision.transform.CompareTag("Player") && SceneManager.GetActiveScene().name == ("Level2"))
+        {
+            SceneManager.LoadScene("Level3");
+        }
     }
 }

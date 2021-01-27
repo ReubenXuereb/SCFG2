@@ -4,16 +4,13 @@ using UnityEngine;
 
 public class Walls : MonoBehaviour
 {
-    [SerializeField] List<GameObject> Wall;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+
+   /* private void OnTriggerEnter2D(Collider2D collider)
     {
-        
-    }
+        if (collider.transform.CompareTag("Player"))
+        {
+            GameObject.Find("snakeHead").GetComponent<snakeController>().isDead();
+        }
+    }*/
 }

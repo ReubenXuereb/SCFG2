@@ -8,8 +8,12 @@ public class foodGenerator : MonoBehaviour
 
     GameObject foodObject;
 
-    public List<positionRecord> allTheFood;
+   public List<positionRecord> allTheFood;
 
+    public foodGenerator(List<positionRecord> allTheFood)
+    {
+        this.allTheFood = allTheFood;
+    }
 
     snakeGenerator sn;
 
