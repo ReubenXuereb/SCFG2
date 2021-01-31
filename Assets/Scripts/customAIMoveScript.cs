@@ -14,7 +14,7 @@ public class customAIMoveScript : MonoBehaviour
     Path pathToFollow;
 
     //a reference from the UI to the green box
-    public Transform target;
+    Transform target;
 
     //a reference to PointGraphObject
     GameObject graphParent;
@@ -22,13 +22,20 @@ public class customAIMoveScript : MonoBehaviour
     //the node of the graph that is going to correspond with the green box
     GameObject targetNode;
 
-    public List<Transform> obstacleNodes;
+    public GameObject enemyAI;
+
+    List<Vector3> posns;
+
+    int enemyTail;
+
+    SpawnEnemyAI spawnAI;
+    
 
 
     // Start is called before the first frame update
     void Start()
     {
-
+        
         Debug.Log(this.name);
 
         //the instance of the seeker attached to this game object
@@ -36,118 +43,86 @@ public class customAIMoveScript : MonoBehaviour
 
 
         //node target by name
-        targetNode = GameObject.Find("TargetNode");
+        //targetNode = GameObject.Find("TargetNode");
 
         //find the parent node of the point graph
-         graphParent = GameObject.Find("PointGraphObject");
+         graphParent = GameObject.Find("AStarGrid");
         //graphParent = GameObject.Find("AStarGrid");
         //we scan the graph to generate it in memory
         graphParent.GetComponent<AstarPath>().Scan();
-
+        
         //generate the initial path
-        pathToFollow = seeker.StartPath(transform.position, target.position);
+        //pathToFollow = seeker.StartPath(transform.position, target.position);
 
-        //move the green box in a coroutine.  Runs indefinitely
-        StartCoroutine(moveTarget());
+       
 
         //update the graph as soon as you can.  Runs indefinitely
         StartCoroutine(updateGraph());
 
         //move the red robot towards the green enemy
-        StartCoroutine(moveTowardsEnemy(this.transform));
-    }
-
-    //the code that is going to move my target.
-    IEnumerator moveTarget()
-    {
-        //create a new list of positions.
-        List<Vector3> positions = new List<Vector3>();
-        //target's current position (the top position)
-        positions.Add(target.position);
-
-        //adding another position (the bottom position)
-        positions.Add(new Vector3(target.position.x, -target.position.y));
 
         
-
-        //Class Task 1: Add another 5 positions to the circuit
-        //Class Task 2: Build a coroutine that will move the white obstacle up and down, INCLUDING the 4 nodes 
-
-        //starting position, the list of positions and a boolean parameter stating if the path is looped
-        StartCoroutine(moveTarget(target.transform, positions, true));
-
-
-
-        yield return null;
-
+        spawnAI = GameObject.Find("Main Camera").GetComponent<SpawnEnemyAI>();
+        enemyTail = spawnAI.snakelength;
     }
 
+ 
+   
+    private void Update()
+    {
+        findTarget();
 
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            LineRenderer lineRenderer = GetComponent<LineRenderer>();
+            
+            lineRenderer.positionCount = posns.Count;
+            lineRenderer.SetPositions(pathToFollow.vectorPath.ToArray());
+        }
+      
+    }
+
+    private void findTarget()
+    {
+        if (target == null)
+        {
+            if (GameObject.FindGameObjectWithTag("Player"))
+            {
+                target = GameObject.FindGameObjectWithTag("Player").transform;
+                pathToFollow = seeker.StartPath(transform.position, target.position);
+                StartCoroutine(moveTowardsEnemy(this.transform));
+            }
+        }
+    }
 
     IEnumerator updateGraph()
     {
         while (true)
         {
-
-          targetNode.transform.position = target.position;
+            //targetNode.transform.position = target.position;
             graphParent.GetComponent<AstarPath>().Scan();
-
-
             yield return null;
 
         }
 
     }
 
-    IEnumerator moveTarget(Transform t, List<Vector3> points, bool loop)
+    /*IEnumerator spawnEnemy()
     {
-        if (loop)
-        {
-            //needs to run indefinitely
-            while (true)
-            {
-                List<Vector3> forwardpoints = points;
-
-                foreach (Vector3 position in forwardpoints)
-                {
-                    while (Vector3.Distance(t.position, position) > 0.5f)
-                    {
-                        t.position = Vector3.MoveTowards(t.position, position, 1f);
-                        Debug.Log(position);/**/
-                        yield return new WaitForSeconds(0.2f);
-                    }
-                }
-                //reverse the points supplied here
-                forwardpoints.Reverse();
-                yield return null;
-
-            }
-        }
-        else
-        {
-            foreach (Vector3 position in points)
-            {
-                while (Vector3.Distance(t.position, position) > 0.5f)
-                {
-                    t.position = Vector3.MoveTowards(t.position, position, 1f);
-                    /**/
-                    yield return new WaitForSeconds(0.2f);
-                }
-            }
-            yield return null;
-        }
+        yield return new WaitForSeconds(3f);
+        Instantiate(enemyAI, new Vector3(4.5f, -2.5f, 0), Quaternion.identity);
+    }*/
 
 
-    }
-
-
+    
     IEnumerator moveTowardsEnemy(Transform t)
     {
 
         while (true)
         {
 
-            List<Vector3> posns = pathToFollow.vectorPath;
+            posns = pathToFollow.vectorPath;
             Debug.Log("Positions Count: " + posns.Count);
 
             for (int counter = 0; counter < posns.Count; counter++)
@@ -163,9 +138,13 @@ public class customAIMoveScript : MonoBehaviour
                         yield return seeker.IsDone();
                         //if the path is different, update the path that I need to follow
                         posns = pathToFollow.vectorPath;
+                        spawnAI.savePosition();
+                        spawnAI.enemyDrawTail(enemyTail);
 
-                      //  Debug.Log("@:" + t.position + " " + target.position + " " + posns[counter]);
-                        yield return new WaitForSeconds(0.2f);
+
+                        //  Debug.Log("@:" + t.position + " " + target.position + " " + posns[counter]);
+                        yield return new WaitForSeconds(0.5f);
+
                     }
 
                 }
@@ -180,6 +159,8 @@ public class customAIMoveScript : MonoBehaviour
             yield return null;
         }
     }
+
+    
 
 
 }

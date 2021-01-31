@@ -93,15 +93,16 @@ public class squareGenerator : MonoBehaviour
     IEnumerator chessBoard()
     {
         bool alternatey = false;
-        for (float ycoord = -4.5f; ycoord <= 4.5f; ycoord++)
+        for (float ycoord = -4.5f; ycoord <= 4.5f; ycoord += 4)
         {
             //for each row
             for (float xcoord = -4.5f; xcoord <= 4.5f; xcoord++)
             {
                 GameObject sq = createSquare(xcoord, ycoord);
+                
                 if (alternatey)
                 {
-                    if ((Mathf.Floor(xcoord) % 2 == 0) )
+                    if ((Mathf.Floor(xcoord) % 4 == 0) )
                     {
                         sq.GetComponent<SpriteRenderer>().color = Color.black;
                     }
@@ -112,7 +113,7 @@ public class squareGenerator : MonoBehaviour
                 }
                 else
                 {
-                    if (Mathf.Floor(xcoord) % 2 == 0) 
+                    if (Mathf.Floor(xcoord) % 4 == 0) 
                     {
                         sq.GetComponent<SpriteRenderer>().color = Color.white;
                     }

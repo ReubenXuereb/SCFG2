@@ -56,4 +56,74 @@ public class foodScript : MonoBehaviour
             }
         }
     }*/
+
+    [SerializeField] GameObject food;
+
+    void Start()
+    {
+        StartCoroutine(foodSpawner());
+    }
+
+   
+
+    IEnumerator foodSpawner()
+    {
+        bool alternatey = false;
+        for (float ycoord = -9.5f; ycoord <= 9.5f; ycoord++)
+        {
+            //for each row
+            for (float xcoord = -9.5f; xcoord <= 9.5f; xcoord++)
+            {
+                GameObject sq = createSquare(xcoord, ycoord);
+               // if (alternatey)
+               // {
+                    if ((Mathf.Floor(xcoord) % 5 == 0))
+                    {
+                        sq.GetComponent<SpriteRenderer>().color = Color.green;
+                    }
+                    else if((Mathf.Floor(ycoord) % 5 == 0))
+                    {
+                    sq.GetComponent<SpriteRenderer>().color = Color.green;
+                    }
+                   /* else
+                    {
+                       sq.GetComponent<SpriteRenderer>().color = Color.;
+                    }*/
+               // }
+                /*else
+                {
+                    if ((Mathf.Floor(ycoord) % 4 == 0))
+                    {
+                        sq.GetComponent<SpriteRenderer>().color = Color.green;
+                    }
+                    else
+                    {
+                        sq.GetComponent<SpriteRenderer>().color = Color.white;
+                    }
+                }*/
+                /*else
+                {
+                    if (Mathf.Floor(xcoord) % 4 == 0)
+                    {
+                       sq.GetComponent<SpriteRenderer>().color = Color.white;
+                    }
+                    else
+                    {
+                        sq.GetComponent<SpriteRenderer>().color = Color.green;
+                    }
+                }*/
+
+                //yield return new WaitForSeconds(1f);
+            }
+            //alternatey = !alternatey;
+            yield return new WaitForSeconds(1f);
+        }
+        yield return null;
+    }
+
+    GameObject createSquare(float xpos, float ypos)
+    {
+        return Instantiate(food, new Vector3(xpos, ypos), Quaternion.identity);
+    }
+
 }

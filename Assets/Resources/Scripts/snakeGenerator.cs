@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 public class positionRecord
 
@@ -13,22 +13,6 @@ public class positionRecord
     Vector3 position;
     //at which point was I there?
     int positionOrder;
-
-    //positionRecord{positionorder = 1, position = new Vector3(1f,1f);}
-
-    //positionRecord2{positionorder = 1, position = new Vector3(1.5f,1f);}
-
-    //positionRecord == positionRecord2
-
-    //List<positionRecord>() myList
-
-    //positionRecord1,positionRecord2
-
-    //myList.Contains(positionRecord2); == true
-
-
-
-    
 
     GameObject breadcrumbBox;
 
@@ -62,9 +46,7 @@ public class positionRecord
 
         
             //the distance between any food spawned
-            return Vector3.Distance(this.position,o.position) < 2f;
-       
-       
+            return Vector3.Distance(this.position,o.position) < 5f;
     }
 
     public override int GetHashCode()
@@ -91,7 +73,13 @@ public class snakeGenerator : MonoBehaviour
 
     int pastpositionslimit = 100;
 
+    public Transform spawnPoint;
+
     GameObject playerBox,breadcrumbBox,pathParent,timerUI;
+
+    public GameObject snakeHead;
+
+    public GameObject portal;
 
     List<positionRecord> pastPositions;
 
@@ -127,9 +115,10 @@ public class snakeGenerator : MonoBehaviour
 
         snakeColor = Color.green;
 
-        playerBox = Instantiate(Resources.Load<GameObject>("Prefabs/Square"), new Vector3(0f, 0f), Quaternion.identity);
+        playerBox = Instantiate(snakeHead, spawnPoint.position, Quaternion.identity);
+       
 
-        timerUI = Instantiate(Resources.Load<GameObject>("Prefabs/Timer"), new Vector3(0f, 0f), Quaternion.identity);
+        timerUI = Instantiate(Resources.Load<GameObject>("Prefabs/Timer"), new Vector3(-8f, 0f), Quaternion.identity);
 
         //the default value for the timer is started
         timerUI.GetComponentInChildren<timerManager>().timerStarted = true;
@@ -144,12 +133,19 @@ public class snakeGenerator : MonoBehaviour
         pathParent.name = "Path Parent";
 
         
-        breadcrumbBox = Resources.Load <GameObject>("Prefabs/Square");
+        breadcrumbBox = Resources.Load<GameObject>("Prefabs/Square");
 
-        playerBox.GetComponent<SpriteRenderer>().color = Color.black;
+       /* playerBox.GetComponent<SpriteRenderer>().color = Color.black;
+        playerBox.AddComponent<BoxCollider2D>();
+        playerBox.GetComponent<BoxCollider2D>().isTrigger = true;
+
 
         //move the box with the arrow keys
         playerBox.AddComponent<snakeheadController>();
+        playerBox.AddComponent<Rigidbody2D>();
+        playerBox.GetComponent<Rigidbody2D>().isKinematic = true;*/
+
+
 
         playerBox.name = "Black player box";
 
@@ -163,78 +159,48 @@ public class snakeGenerator : MonoBehaviour
        
     }
 
-    //TASK 1: create a coroutine based on this code that when the X key is pressed, the box is going to go through
-    //all its past positions, until it gets to the beginning. The speed should be one position every second
-    IEnumerator reverseMoves()
+
+    public void toNextLevel() 
     {
-        //1. check that we have more than 5 moves, otherwise don't run
-        if (pastPositions.Count < 5)
+
+        if (SceneManager.GetActiveScene().name == "Level1")
         {
-            yield return null;
+            if (snakelength >= 6)
+            {
+                GameObject.Find("Portal").GetComponent<SpriteRenderer>().color = Color.yellow;
+            }
+            else if(snakelength < 6)
+            {
+                GameObject.Find("Portal").GetComponent<SpriteRenderer>().color = Color.red;
+            }
         }
 
-
-        //2. reverse the list of moves, to get the moves I want to go back to
-        List<positionRecord> reversedPositions = new List<positionRecord>();
-
-        reversedPositions = pastPositions;
-
-        reversedPositions.Reverse();
-
-
-        //3. iterate through the moves, waiting for one second every move
-        foreach(positionRecord p in reversedPositions)
+        if (SceneManager.GetActiveScene().name == "Level2")
         {
-            playerBox.transform.position = p.Position;
-
-            yield return new WaitForSeconds(1f);
+            if (snakelength >= 10)
+            {
+                GameObject.Find("Portal").GetComponent<SpriteRenderer>().color = Color.yellow;
+            }
+            else if (snakelength <= 6)
+            {
+                GameObject.Find("Portal").GetComponent<SpriteRenderer>().color = Color.red;
+            }
         }
 
-
-        yield return null;
+        if (SceneManager.GetActiveScene().name == "Level3")
+        {
+            if (snakelength >= 6)
+            {
+                GameObject.Find("Portal").GetComponent<SpriteRenderer>().color = Color.yellow;
+            }
+            else if (snakelength < 6)
+            {
+                GameObject.Find("Portal").GetComponent<SpriteRenderer>().color = Color.red;
+            }
+        }
     }
 
 
-    //TASK 2: We want to show or hide the trail we have just created.  What would be a good way of doing this?
-
-
-
-
-    //TASK 3: We want to stop our box from going out of the camera.  
-    //What would be an optimized way of making sure this doesn't happen
-    //Mathf.Clamp is a very interesting function
-
-    //TASK 4: Only generate the red breadcrumbs if you REALLY need them
-
-
-    //TASK 5: Create a coroutine to move the black box all the way around the screen and back to the center of the screen once a full
-    //circuit has been completed.  This should be trigged by pressing the space bar. 
-
-    //TASK 5b: Make sure that all the boxes generated are children of an object called PathParent
-
-    //TASK 6: Implement a button once you click it the snake appears and the timer starts.
-
-    //TASK 7: Implement a coroutine that generates up to 6 blocks every random seconds between 6 and 10 at positions which are
-    //rounded off to the nearest decimal.  Make sure that food cannot spawn on top of a past spawned food. 
-
-
-
-    IEnumerator Task5()
-    {
-        //this takes me to the edge of the screen
-        float xpos = 0f;
-        while(xpos < 10f)
-        {
-            Debug.Log(xpos);
-            playerBox.transform.position += new Vector3(1f, 0f);
-            xpos++;
-            savePosition();
-            yield return new WaitForSeconds(0.1f);
-        }
-
-        
-        yield return null;
-    }
     
 
     // Update is called once per frame
@@ -262,7 +228,7 @@ public class snakeGenerator : MonoBehaviour
     }
 
 
-    void savePosition()
+   public void savePosition()
     {
         positionRecord currentBoxPos = new positionRecord();
 
@@ -285,20 +251,20 @@ public class snakeGenerator : MonoBehaviour
 
         pastPositions.Add(currentBoxPos);
         Debug.Log("Have made this many moves: " + pastPositions.Count);
-       
     }
 
 
-    void cleanList()
+    public void cleanList()
     {
         for(int counter = pastPositions.Count - 1 ; counter > pastPositions.Count;counter--)
-        {
-            pastPositions[counter] = null;
-        }
+         {
+             pastPositions[counter] = null;
+         }
+        //pastPositions.Clear();
     }
 
     
-    public void changeSnakeColor(int length,Color color)
+   /* public void changeSnakeColor(int length,Color color)
     {
         int tailStartIndex = pastPositions.Count - 1;
         int tailEndIndex = tailStartIndex - length;
@@ -310,9 +276,9 @@ public class snakeGenerator : MonoBehaviour
         
             pastPositions[snakeblocks].BreadcrumbBox.GetComponent<SpriteRenderer>().color = color;
         }
-    }
+    }*/
 
-    void drawTail(int length)
+    public void drawTail(int length)
     {
         clearTail();
 
@@ -337,7 +303,6 @@ public class snakeGenerator : MonoBehaviour
                 pastPositions[snakeblocks].BreadcrumbBox.GetComponent<SpriteRenderer>().color = snakeColor;
 
             }
-
         } 
 
         if (firstrun)
@@ -363,7 +328,10 @@ public class snakeGenerator : MonoBehaviour
             //Debug.Log("Not long enough yet");
         }
 
+
+        //tail for enemyAI
     }
+    
 
 
     //if hit tail returns true, the snake has hit its tail
@@ -377,19 +345,39 @@ public class snakeGenerator : MonoBehaviour
         {
             if ((headPosition == pastPositions[snakeblocks].Position) && (pastPositions[snakeblocks].BreadcrumbBox != null))
             {
-              //  Debug.Log("Hit Tail");
+                //  Debug.Log("Hit Tail");
+               
+                if (SceneManager.GetActiveScene().name == "Level1")
+                {
+                    playerBox.transform.position = spawnPoint.position;
+                    clearTail();
+                    snakelength = 2;
+                    GameObject.Find("GameManager").GetComponent<GameManager>().score -= 20;
+                }
+                else if (SceneManager.GetActiveScene().name == "Level2")
+                {
+                    playerBox.transform.position = spawnPoint.position;
+                    clearTail();
+                    snakelength = 6;
+                    GameObject.Find("GameManager").GetComponent<GameManager>().score -= 20;
+                }
+                else if (SceneManager.GetActiveScene().name == "Level3")
+                {
+                    playerBox.transform.position = spawnPoint.position;
+                    clearTail();
+                    snakelength = 2;
+                    GameObject.Find("GameManager").GetComponent<GameManager>().score -= 20;
+                }
                 return true;
             }
         }
-
-
        return false;
 
     }
 
 
 
-    void clearTail()
+   public void clearTail()
     {
         cleanList();
         foreach (positionRecord p in pastPositions)
@@ -399,8 +387,8 @@ public class snakeGenerator : MonoBehaviour
         }
     }
 
+   
 
-  
 
 
     void Update()
@@ -415,14 +403,12 @@ public class snakeGenerator : MonoBehaviour
             //draw a tail of length 4
             drawTail(snakelength);
 
-
-
         }
 
-        if (Input.GetKeyDown(KeyCode.X))
+        /*if (Input.GetKeyDown(KeyCode.X))
         {
             StartCoroutine(reverseMoves());
-        }
+        }*/
 
 
         if (Input.GetKeyDown(KeyCode.Z))
@@ -430,11 +416,13 @@ public class snakeGenerator : MonoBehaviour
             clearTail();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+       /* if (Input.GetKeyDown(KeyCode.Space))
         {
             StartCoroutine(snakeController.automoveCoroutine());
           //  StartCoroutine(Task5());
-        }
+        }*/
+
+        toNextLevel();
 
 
     }

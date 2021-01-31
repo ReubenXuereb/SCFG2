@@ -21,7 +21,7 @@ public class snakeController : MonoBehaviour
     void Start()
     {
         positions = new List<Vector3>();
-        snakeSize = GameObject.Find("GameManager").GetComponent<GameManager>().snakeSize;
+        //snakeSize = GameObject.Find("GameManager").GetComponent<GameManager>().snakeSize;
         //startPos = this.transform.position;
         
         Left = false;
